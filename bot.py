@@ -40,12 +40,17 @@ def webhook():
 
             reply_text = completion.choices[0].message.content
 
-            asyncio.run(
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+            loop.run_until_complete(
                 bot.send_message(
                     chat_id=update.message.chat.id,
                     text=reply_text
                 )
             )
+
+            loop.close()
 
         return "ok"
 
