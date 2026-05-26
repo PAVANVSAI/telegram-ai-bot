@@ -8,9 +8,9 @@ import asyncio
 # =========================
 import os
 
-BOT_TOKEN = os.getenv("8943413347:AAH4c5g_arJB3CM-3n1elkiCwU7v0wLmvWM")
+BOT_TOKEN = "8943413347:AAH4c5g_arJB3CM-3n1elkiCwU7v0wLmvWM"
 
-OPENROUTER_API_KEY = os.getenv("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")
+OPENROUTER_API_KEY = "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"
 
 
 # =========================
