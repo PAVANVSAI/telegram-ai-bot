@@ -1,14 +1,15 @@
 from flask import Flask, request
 from telegram import Bot, Update
-import google.generativeai as genai
+from openai import OpenAI
 import asyncio
 
 BOT_TOKEN = "8943413347:AAH4c5g_arJB3CM-3n1elkiCwU7v0wLmvWM"
-GEMINI_API_KEY = "AIzaSyBKMwsVbs2vGeBUAEXcRau8UTSyX_4a7oI"
+OPENROUTER_API_KEY = "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"
 
-genai.configure(api_key=GEMINI_API_KEY)
-
-model = genai.GenerativeModel("gemini-2.0-flash")
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=OPENROUTER_API_KEY
+)
 bot = Bot(token=BOT_TOKEN)
 
 app = Flask(__name__)
@@ -24,15 +25,21 @@ def webhook():
 
             user_message = update.message.text
 
-            response = model.generate_content(user_message)
+            completion = client.chat.completions.create(
+                model="openai/gpt-3.5-turbo",
+                messages=[
+                    {"role": "user", "content": user_message}
+                ]
+            )
+
+            reply_text = completion.choices[0].message.content
 
             asyncio.run(
                 bot.send_message(
                     chat_id=update.message.chat.id,
-                    text=response.text
+                    text=reply_text
                 )
             )
-
         return "ok"
 
     except Exception as e:
