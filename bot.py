@@ -1,9 +1,7 @@
 from flask import Flask, request
-from telegram import Update
-from telegram.ext import Application, MessageHandler, filters, ContextTypes
+from telegram import Bot, Update
 import google.generativeai as genai
 import asyncio
-import os
 
 BOT_TOKEN = "8943413347:AAH4c5g_arJB3CM-3n1elkiCwU7v0wLmvWM"
 GEMINI_API_KEY = "AIzaSyBKMwsVbs2vGeBUAEXcRau8UTSyX_4a7oI"
@@ -12,26 +10,35 @@ genai.configure(api_key=GEMINI_API_KEY)
 
 model = genai.GenerativeModel("gemini-1.5-flash")
 
+bot = Bot(token=BOT_TOKEN)
+
 app = Flask(__name__)
-
-telegram_app = Application.builder().token(BOT_TOKEN).build()
-
-async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_message = update.message.text
-
-    response = model.generate_content(user_message)
-
-    await update.message.reply_text(response.text)
-
-telegram_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, reply))
 
 @app.route(f"/{BOT_TOKEN}", methods=["POST"])
 def webhook():
-    update = Update.de_json(request.get_json(force=True), telegram_app.bot)
+    try:
+        data = request.get_json()
 
-    asyncio.run(telegram_app.process_update(update))
+        update = Update.de_json(data, bot)
 
-    return "ok"
+        if update.message and update.message.text:
+
+            user_message = update.message.text
+
+            response = model.generate_content(user_message)
+
+            asyncio.run(
+                bot.send_message(
+                    chat_id=update.message.chat.id,
+                    text=response.text
+                )
+            )
+
+        return "ok"
+
+    except Exception as e:
+        print(e)
+        return "error"
 
 @app.route("/")
 def home():
