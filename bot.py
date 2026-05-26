@@ -26,7 +26,7 @@ def webhook():
             user_message = update.message.text
 
             completion = client.chat.completions.create(
-                model="openai/gpt-3.5-turbo",
+                model="meta-llama/llama-3-8b-instruct:free",
                 messages=[
                     {"role": "user", "content": user_message}
                 ]
